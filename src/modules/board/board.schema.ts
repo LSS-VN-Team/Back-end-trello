@@ -18,7 +18,7 @@ export class Board {
   memberList: string[];
 
   @Prop({ type: [String] })
-  imgSourd: string[];
+  imgSource: string[];
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);
