@@ -11,11 +11,14 @@ export class User {
   @Prop({ type: String, required: true })
   password: string;
 
-  @Prop()
-  name: string;
+  @Prop({type: String})
+  firstName: string;
 
-  @Prop()
-  age: number;
+  @Prop({type: String})
+  lastName: string;
+  
+  @Prop({type: [String]})
+  boardList : string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

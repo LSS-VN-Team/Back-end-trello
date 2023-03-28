@@ -15,6 +15,7 @@ import { appConfig } from './config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MongooseModule } from '@nestjs/mongoose';
+console.log(appConfig.database.MONGO_DB.DB_URI);
 
 @Global()
 @Module({

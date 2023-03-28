@@ -29,7 +29,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
-  const PORT = appConfig.server.PORT || 3000;
+  const PORT = appConfig.server.PORT || 3003;
   const HOST = appConfig.server.HOST || 'localhost';
 
   if (process.env.NODE_ENV == 'development') {
