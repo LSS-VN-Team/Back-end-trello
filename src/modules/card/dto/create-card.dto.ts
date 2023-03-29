@@ -1,16 +1,14 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsOptional, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
+export class CreateCardDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  name: string;
 
-export class CreateCardDto{
-    @ApiProperty()
-    @IsOptional()
-    @IsString()
-    name: string;
-
-    @ApiProperty()
-    @IsOptional()
-    @IsString()
-    boardId: string;
-
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  boardId: string;
 }

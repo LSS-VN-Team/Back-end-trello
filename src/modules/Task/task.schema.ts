@@ -5,27 +5,26 @@ export type TaskDocument = HydratedDocument<Task>;
 
 @Schema()
 export class Task {
-  @Prop({ type: String, required: true})
+  @Prop({ type: String, required: true })
   title: string;
 
-  @Prop({type: String})
+  @Prop({ type: String })
   img: string;
 
-  @Prop({type: [String]})
-  follower: String[];
+  @Prop({ type: [String] })
+  follower: string[];
 
-  @Prop({type: [String]})
-  descrip: String;
+  @Prop({ type: [String] })
+  descrip: string;
 
-  @Prop({type: String})
-  attach: String[];
+  @Prop({ type: String })
+  attach: string[];
 
-  @Prop({type: [String]})
-  joinner: String[];
-  
-  @Prop({ type: [String]})
+  @Prop({ type: [String] })
+  joinner: string[];
+
+  @Prop({ type: [String] })
   comment: string[];
-
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

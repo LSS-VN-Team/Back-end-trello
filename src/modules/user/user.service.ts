@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ERROR, PaginationOptions, removeKeyUndefined, totalPagination } from '@app/common';
+import {
+  ERROR,
+  PaginationOptions,
+  removeKeyUndefined,
+  totalPagination,
+} from '@app/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
 import { Model } from 'mongoose';
@@ -11,33 +16,30 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    ) {}
-
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findAll(filter: UserFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
-    if (filter.email){
-      query.email = {$regex: filter.email, $option : 'i'};
+    if (filter.email) {
+      query.email = { $regex: filter.email, $option: 'i' };
     }
 
-    const  countDocument = this.userModel.countDocuments(query);
+    const countDocument = this.userModel.countDocuments(query);
     const getUser = this.userModel.find(query).skip(skip).limit(limit);
 
-    const [amount,user] = await Promise.all([countDocument, getUser]);
+    const [amount, user] = await Promise.all([countDocument, getUser]);
 
-    return{
-      totalPage : totalPagination(amount,limit),
+    return {
+      totalPage: totalPagination(amount, limit),
       currentPage: page,
-      data: user
-    }
+      data: user,
+    };
     // return `This action returns all user`;
   }
 
   async findOne(id: string) {
-    const user = await this.userModel.findById({_id: id}).lean(); 
+    const user = await this.userModel.findById({ _id: id }).lean();
     if (!user) throw new Error(`User with id is ${id} does not exist`);
     return user;
   }
@@ -62,7 +64,7 @@ export class UserService {
     return this.userModel.findByIdAndDelete(id);
   }
 
-  async addBoard(idUser: string,idBoard: string){
+  async addBoard(idUser: string, idBoard: string) {
     const user = await this.userModel.findById(idUser).lean();
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
     return user.boardList.push(idBoard);
