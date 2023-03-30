@@ -3,6 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type TaskDocument = HydratedDocument<Task>;
 
+
 @Schema()
 export class Task {
   @Prop({ type: String, required: true })
@@ -10,6 +11,9 @@ export class Task {
 
   @Prop({ type: String })
   img: string;
+
+  @Prop({ type: String })
+  idCard: string;
 
   @Prop({ type: [String] })
   follower: string[];
@@ -23,8 +27,8 @@ export class Task {
   @Prop({ type: [String] })
   joinner: string[];
 
-  @Prop({ type: [String] })
-  comment: string[];
+  @Prop({type: [String]})
+  commentList: string[];
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

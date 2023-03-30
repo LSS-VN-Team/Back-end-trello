@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { plainToInstance } from 'class-transformer';
 import { Model } from 'mongoose';
 import { Board, BoardDocument } from '../board/board.schema';
+import { TaskService } from '../Task/task.service';
 import { Card, CardDocument } from './card.schema';
 import { CreateCardDto } from './dto/create-card.dto';
 import { CardFilterDto } from './dto/filter-card.dto';
@@ -18,6 +19,7 @@ export class CardService {
   constructor(
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
+    private readonly taskSerVice: TaskService,
   ) {}
 
   async findAll(filter: CardFilterDto, pagination: PaginationOptions) {
@@ -46,25 +48,27 @@ export class CardService {
     return card;
   }
   async create(data: CreateCardDto) {
-    const newCard = new this.cardModel(data.name);
+    const newCard = new this.cardModel(data);
     const board = await this.boardModel.findById(data.boardId).lean();
     if (!board)
       throw new Error(`Board ID with id is ${data.boardId} does not exist`);
     else {
-      const card = await newCard.save();
+      await newCard.save();
       board.cardList.push(newCard._id.toString());
       await this.boardModel.findByIdAndUpdate(
         data.boardId,
         { cardList: board.cardList },
         { new: true },
       );
-      return card;
+      return [newCard, board];
     }
   }
   async remove(idCard: string, idBoard: string) {
     const card = await this.cardModel.findById(idCard).lean();
     if (!card) throw new Error(`Card with id is ${idCard} does not exist`);
     else {
+      for (let i=card.taskList.length-1;i>=0;i--)
+        this.taskSerVice.remove(idCard,card.taskList.at(i));
       const board = await this.boardModel.findById(idBoard).lean();
       if (!board)
         throw new Error(`Project Board with id is ${idCard} does not exist`);

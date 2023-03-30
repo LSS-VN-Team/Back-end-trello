@@ -7,6 +7,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { plainToInstance } from 'class-transformer';
 import { Model } from 'mongoose';
+import { Card, CardDocument } from '../card/card.schema';
+import { CardService } from '../card/card.service';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User, UserDocument } from '../user/user.schema';
 import { UserService } from '../user/user.service';
@@ -20,7 +22,9 @@ export class BoardService {
   constructor(
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>, // @InjectModel(User.name) private userModel: Model<UserDocument>, // private readonly userService: UserService,
-  ) {}
+    @InjectModel(Card.name) private cardModel: Model<CardDocument>,
+    private readonly cardService: CardService,
+    ) {}
 
   async findAll(filter: BoardFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
@@ -70,6 +74,18 @@ export class BoardService {
     const board = await this.boardModel.findById(id).lean();
     if (!board)
       throw new Error(`Project Board with id is ${id} does not exist`);
+    else{
+      for (let i=0;i<board.memberList.length;i++){
+        const member = await this.userModel.findById(board.memberList.at(i)).lean();
+        for (let j=0;j<member.boardList.length;j++)
+          if( member.boardList.at(i)== id){
+            member.boardList.splice(i,1);
+            break;
+          }
+      }
+      // for (let i=board.cardList.length-1;i>=0;i--)
+      //   this.cardService.remove(board.cardList.at(i), board._id.toString());
+    }
     return this.boardModel.findByIdAndDelete(id);
   }
 
