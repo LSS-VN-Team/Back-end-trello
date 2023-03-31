@@ -23,8 +23,8 @@ export class TaskService {
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(CM.name) private commentModel: Model<CommentDocument>,
-    private readonly commentService : CommentService,
-    ) {}
+    private readonly commentService: CommentService,
+  ) {}
 
   async findAll(filter: TaskFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
@@ -69,15 +69,28 @@ export class TaskService {
       return task;
     }
   }
+  async removeUpToDown(idTask : string){
+    const task = await this.taskModel.findById(idTask).lean();
 
-  async remove(idCard: string, idTask: string) {
+    while (task.commentList.length){
+      this.commentService.removeUptoDown(task.commentList.at(0));
+      task.commentList.splice(0,1);
+    }
+        
+
+    return this.taskModel.findByIdAndDelete(idTask);
+    
+  }
+  async remove( idTask: string) {
     const task = await this.taskModel.findById(idTask).lean();
     if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
     else {
-      for (let i=0;i<task.commentList.length;i++)
-        this.commentService.removeAllCmt(task.commentList.at(i));
-      task.commentList.splice(0,task.commentList.length);
-      const card = await this.cardModel.findById(idCard).lean();
+      while (task.commentList.length){
+        this.commentService.removeUptoDown(task.commentList.at(0));
+        task.commentList.splice(0,1);
+      }
+        
+      const card = await this.cardModel.findById(task.idCard).lean();
       for (let i = 0; i < card.taskList.length; i++)
         if (card.taskList.at(i) == idTask) {
           card.taskList.splice(i, 1);
@@ -106,87 +119,86 @@ export class TaskService {
     );
   }
 
-  async addFollower(idTask:string, idUser:string){
+  async addFollower(idTask: string, idUser: string) {
     const user = await this.userModel.findById(idUser).lean();
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
-    else{
-        const task = await this.taskModel.findById(idTask).lean();
-        if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
-        else{
-            task.follower.push(idUser);
-            const newData :string[]= task.follower;
-            const newTask = await this.taskModel.findByIdAndUpdate(
-                task._id,
-                { follower: newData },
-                { new: true },
-              );
-            return task;
-        }
+    else {
+      const task = await this.taskModel.findById(idTask).lean();
+      if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
+      else {
+        task.follower.push(idUser);
+        const newData: string[] = task.follower;
+        const newTask = await this.taskModel.findByIdAndUpdate(
+          task._id,
+          { follower: newData },
+          { new: true },
+        );
+        return task;
+      }
     }
   }
 
-  async removeFollower(idTask:string, idUser:string){
+  async removeFollower(idTask: string, idUser: string) {
     const user = await this.userModel.findById(idUser).lean();
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
-    else{
-        const task = await this.taskModel.findById(idTask).lean();
-        if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
-        else{
-            for (let i=0;i<task.follower.length;i++)
-                if (task.follower.at(i)==idUser){
-                    task.follower.splice(i,1);
-                    break;
-                }
-            await this.taskModel.findByIdAndUpdate(
-                task._id,
-                { follower: task.follower },
-                { new: true },
-              );
-            return task;
-        }
+    else {
+      const task = await this.taskModel.findById(idTask).lean();
+      if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
+      else {
+        for (let i = 0; i < task.follower.length; i++)
+          if (task.follower.at(i) == idUser) {
+            task.follower.splice(i, 1);
+            break;
+          }
+        await this.taskModel.findByIdAndUpdate(
+          task._id,
+          { follower: task.follower },
+          { new: true },
+        );
+        return task;
+      }
     }
   }
 
-  async addJoinner(idTask:string, idUser:string){
+  async addJoinner(idTask: string, idUser: string) {
     const user = await this.userModel.findById(idUser).lean();
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
-    else{
-        const task = await this.taskModel.findById(idTask).lean();
-        if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
-        else{
-            this.addFollower(idTask,idUser);
-            task.joinner.push(idUser);
-            await this.taskModel.findByIdAndUpdate(
-                task._id,
-                { joinner: task.joinner },
-                { new: true },
-              );
-            return task;
-        }
+    else {
+      const task = await this.taskModel.findById(idTask).lean();
+      if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
+      else {
+        this.addFollower(idTask, idUser);
+        task.joinner.push(idUser);
+        await this.taskModel.findByIdAndUpdate(
+          task._id,
+          { joinner: task.joinner },
+          { new: true },
+        );
+        return task;
+      }
     }
   }
 
-  async removeJoinner(idTask:string, idUser:string){
+  async removeJoinner(idTask: string, idUser: string) {
     const user = await this.userModel.findById(idUser).lean();
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
-    else{
-        const task = await this.taskModel.findById(idTask).lean();
-        if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
-        else{
-            this.removeFollower(idTask,idUser);
-            for (let i=0;i<task.joinner.length;i++)
-                if (task.joinner.at(i)==idUser){
-                    task.joinner.splice(i,1);
-                    break;
-                }
-            await this.taskModel.findByIdAndUpdate(
-                task._id,
-                { joinner: task.joinner },
-                { new: true },
-              );
-            return task;
-        }
+    else {
+      const task = await this.taskModel.findById(idTask).lean();
+      if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
+      else {
+        this.removeFollower(idTask, idUser);
+        for (let i = 0; i < task.joinner.length; i++)
+          if (task.joinner.at(i) == idUser) {
+            task.joinner.splice(i, 1);
+            break;
+          }
+        await this.taskModel.findByIdAndUpdate(
+          task._id,
+          { joinner: task.joinner },
+          { new: true },
+        );
+        return task;
+      }
     }
   }
-
 }

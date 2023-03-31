@@ -63,13 +63,12 @@ export class TaskController {
   }
 
   @ApiOperation({ summary: 'Delete Task' })
-  @Delete(':idCard/:idTask')
+  @Delete(':id')
   async remove(
-    @Param('idCard') idCard: string,
-    @Param('idTask') idTask: string,
+    @Param('id') id: string,
   ) {
     try {
-      const result = await this.taskService.remove(idCard, idTask);
+      const result = await this.taskService.remove(id);
       return responseSuccess(result);
     } catch (error) {
       this.logger.error(error.stack);
@@ -91,7 +90,10 @@ export class TaskController {
 
   @ApiOperation({ summary: 'Add Follower' })
   @Patch('/addFollower/:idTask/:idUser')
-  async addFollower(@Param('idTask') idTask: string,@Param('idUser') idUser: string) {
+  async addFollower(
+    @Param('idTask') idTask: string,
+    @Param('idUser') idUser: string,
+  ) {
     try {
       const result = await this.taskService.addFollower(idTask, idUser);
       return responseSuccess(result);
@@ -103,7 +105,10 @@ export class TaskController {
 
   @ApiOperation({ summary: 'Remove Follower' })
   @Patch('/removeFollower/:idTask/:idUser')
-  async removeFollower(@Param('idTask') idTask: string,@Param('idUser') idUser: string) {
+  async removeFollower(
+    @Param('idTask') idTask: string,
+    @Param('idUser') idUser: string,
+  ) {
     try {
       const result = await this.taskService.removeFollower(idTask, idUser);
       return responseSuccess(result);
@@ -115,7 +120,10 @@ export class TaskController {
 
   @ApiOperation({ summary: 'Add Joinner' })
   @Patch('/addJoinner/:idTask/:idUser')
-  async addJoinner(@Param('idTask') idTask: string,@Param('idUser') idUser: string) {
+  async addJoinner(
+    @Param('idTask') idTask: string,
+    @Param('idUser') idUser: string,
+  ) {
     try {
       const result = await this.taskService.addJoinner(idTask, idUser);
       return responseSuccess(result);
@@ -127,7 +135,10 @@ export class TaskController {
 
   @ApiOperation({ summary: 'Remove Joinner' })
   @Patch('/removeJoinner/:idTask/:idUser')
-  async removeJoinner(@Param('idTask') idTask: string,@Param('idUser') idUser: string) {
+  async removeJoinner(
+    @Param('idTask') idTask: string,
+    @Param('idUser') idUser: string,
+  ) {
     try {
       const result = await this.taskService.removeJoinner(idTask, idUser);
       return responseSuccess(result);
@@ -136,5 +147,4 @@ export class TaskController {
       return responseError(error.message || error);
     }
   }
-
 }

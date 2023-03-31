@@ -24,13 +24,13 @@ export class BoardService {
     @InjectModel(User.name) private userModel: Model<UserDocument>, // @InjectModel(User.name) private userModel: Model<UserDocument>, // private readonly userService: UserService,
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
     private readonly cardService: CardService,
-    ) {}
+  ) {}
 
   async findAll(filter: BoardFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
     if (filter.name) {
-      query.email = { $regex: filter.name, $option: 'i' };
+      query.name = { $regex: filter.name, $option: 'i' };
     }
 
     const countDocument = this.boardModel.countDocuments(query);
@@ -74,17 +74,24 @@ export class BoardService {
     const board = await this.boardModel.findById(id).lean();
     if (!board)
       throw new Error(`Project Board with id is ${id} does not exist`);
-    else{
-      for (let i=0;i<board.memberList.length;i++){
-        const member = await this.userModel.findById(board.memberList.at(i)).lean();
-        for (let j=0;j<member.boardList.length;j++)
-          if( member.boardList.at(i)== id){
-            member.boardList.splice(i,1);
+    else {
+      while(board.cardList.length!=0)
+        {
+          this.cardService.removeUpToDown(board.cardList.at(0));
+          board.cardList.splice(0,1);
+        }
+      for (let i = 0; i < board.memberList.length; i++) {
+        const member = await this.userModel
+          .findById(board.memberList.at(i))
+          .lean();
+        for (let j = 0; j < member.boardList.length; j++)
+          if (member.boardList.at(i) == id) {
+            member.boardList.splice(i, 1);
             break;
           }
       }
-      // for (let i=board.cardList.length-1;i>=0;i--)
-      //   this.cardService.remove(board.cardList.at(i), board._id.toString());
+      for (let i=board.cardList.length-1;i>=0;i--)
+        this.cardService.remove(board.cardList.at(i));
     }
     return this.boardModel.findByIdAndDelete(id);
   }

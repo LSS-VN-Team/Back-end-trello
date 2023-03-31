@@ -3,7 +3,6 @@ import { HydratedDocument } from 'mongoose';
 
 export type TaskDocument = HydratedDocument<Task>;
 
-
 @Schema()
 export class Task {
   @Prop({ type: String, required: true })
@@ -27,7 +26,7 @@ export class Task {
   @Prop({ type: [String] })
   joinner: string[];
 
-  @Prop({type: [String]})
+  @Prop({ type: [String] })
   commentList: string[];
 }
 

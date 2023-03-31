@@ -73,18 +73,18 @@ export class UserController {
       return responseError(error.message || error);
     }
   }
-  @ApiOperation({ summary: 'Add board' })
-  @Post()
-  async addBoard(
-    @Param('idUser') idUser: string,
-    @Param('idBoard') idBoard: string,
-  ) {
-    try {
-      const result = await this.userService.addBoard(idUser, idBoard);
-      return responseSuccess(result);
-    } catch (error) {
-      this.logger.error(error.stack);
-      return responseError(error.message || error);
-    }
-  }
+  // @ApiOperation({ summary: 'Add board' })
+  // @Post()
+  // async addBoard(
+  //   @Param('idUser') idUser: string,
+  //   @Param('idBoard') idBoard: string,
+  // ) {
+  //   try {
+  //     const result = await this.userService.addBoard(idUser, idBoard);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
 }

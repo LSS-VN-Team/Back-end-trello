@@ -61,7 +61,7 @@ export class CardController {
     }
   }
   @ApiOperation({ summary: 'Update Card' })
-  @Patch('id')
+  @Patch(':id')
   async update(@Param('id') id: string, @Body() data: UpdateCardDto) {
     try {
       const result = await this.cardService.update(id, data);
@@ -73,13 +73,10 @@ export class CardController {
   }
 
   @ApiOperation({ summary: 'Delete Card' })
-  @Delete('/removeCard/:idCard/:idBoard')
-  async remove(
-    @Param('idCard') idCard: string,
-    @Param('idBoard') idBoard: string,
-  ) {
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
     try {
-      const result = await this.cardService.remove(idCard, idBoard);
+      const result = await this.cardService.remove(id);
       return responseSuccess(result);
     } catch (error) {
       this.logger.error(error.stack);

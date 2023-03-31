@@ -11,7 +11,7 @@ export class Card {
   @Prop({ type: [String] })
   taskList: string[];
 
-  @Prop({type: String})
+  @Prop({ type: String })
   idBoard: string;
 }
 export const CardSchema = SchemaFactory.createForClass(Card);

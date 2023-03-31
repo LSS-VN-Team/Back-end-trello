@@ -49,27 +49,51 @@ export class CardService {
   }
   async create(data: CreateCardDto) {
     const newCard = new this.cardModel(data);
-    const board = await this.boardModel.findById(data.boardId).lean();
+    const board = await this.boardModel.findById(data.idBoard).lean();
     if (!board)
-      throw new Error(`Board ID with id is ${data.boardId} does not exist`);
+      throw new Error(`Board ID with id is ${data.idBoard} does not exist`);
     else {
       await newCard.save();
       board.cardList.push(newCard._id.toString());
       await this.boardModel.findByIdAndUpdate(
-        data.boardId,
+        data.idBoard,
         { cardList: board.cardList },
         { new: true },
       );
       return [newCard, board];
     }
   }
-  async remove(idCard: string, idBoard: string) {
+
+  async removeAll(idCard: string){
+    const card = await this.cardModel.findById(idCard).lean();
+    for (let i =0;i< card.taskList.length ; i++)
+    this.taskSerVice.remove(card.taskList.at(0));
+    return this.cardModel.findByIdAndDelete(idCard);
+}
+
+async removeUpToDown(idCard : string){
+  const card = await this.cardModel.findById(idCard).lean();
+  while (card.taskList.length)
+      {
+        this.taskSerVice.removeUpToDown(card.taskList.at(0));
+        card.taskList.splice(0,1);
+      }
+
+  return this.cardModel.findByIdAndDelete(idCard);
+  
+  }
+  
+  
+  async remove(idCard: string) {
     const card = await this.cardModel.findById(idCard).lean();
     if (!card) throw new Error(`Card with id is ${idCard} does not exist`);
     else {
-      for (let i=card.taskList.length-1;i>=0;i--)
-        this.taskSerVice.remove(idCard,card.taskList.at(i));
-      const board = await this.boardModel.findById(idBoard).lean();
+      while(card.taskList.length!=0)
+        {
+          this.taskSerVice.removeUpToDown(card.taskList.at(0));
+          card.taskList.splice(0,1);
+        }
+      const board = await this.boardModel.findById(card.idBoard).lean();
       if (!board)
         throw new Error(`Project Board with id is ${idCard} does not exist`);
       else {
@@ -79,7 +103,7 @@ export class CardService {
             break;
           }
         await this.boardModel.findByIdAndUpdate(
-          idBoard,
+          card.idBoard,
           { cardList: board.cardList },
           { new: true },
         );

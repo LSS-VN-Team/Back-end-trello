@@ -30,15 +30,21 @@ import { BoardService } from './board.service';
       },
       {
         name: Task.name,
-        schema: TaskSchema
+        schema: TaskSchema,
       },
       {
         name: CM.name,
-        schema: CommentSchema
+        schema: CommentSchema,
       },
     ]),
   ],
   controllers: [BoardController],
-  providers: [CardService, BoardService, UserService,TaskService,CommentService],
+  providers: [
+    CardService,
+    BoardService,
+    UserService,
+    TaskService,
+    CommentService,
+  ],
 })
 export class BoardModule {}

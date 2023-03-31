@@ -33,11 +33,17 @@ import { TaskService } from './task.service';
       },
       {
         name: CM.name,
-        schema: CommentSchema
-      }
+        schema: CommentSchema,
+      },
     ]),
   ],
   controllers: [TaskController],
-  providers: [TaskService, CardService,BoardService,UserService,CommentService],
+  providers: [
+    TaskService,
+    CardService,
+    BoardService,
+    UserService,
+    CommentService,
+  ],
 })
 export class TaskModule {}

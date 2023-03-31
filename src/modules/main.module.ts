@@ -7,7 +7,14 @@ import { TaskModule } from './Task/task.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [UserModule, AuthModule, BoardModule, CardModule, TaskModule,CommentModule],
+  imports: [
+    UserModule,
+    AuthModule,
+    BoardModule,
+    CardModule,
+    TaskModule,
+    CommentModule,
+  ],
   controllers: [],
   providers: [],
 })
