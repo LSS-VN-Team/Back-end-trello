@@ -1,4 +1,6 @@
+import { Pagination, PaginationOptions } from '@app/common';
 import { responseError, responseSuccess } from '@app/core/base/base.controller';
+import { Patch, Query } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -15,6 +17,8 @@ import { Model } from 'mongoose';
 import { Board, BoardDocument } from './board.schema';
 import { BoardService } from './board.service';
 import { BoardDto } from './dtos/create-board.dto';
+import { FillterBoardDto } from './dtos/fillter-board.dto';
+import { UpdateBoardDto } from './dtos/update-board.dto';
 
 @ApiTags('Project Board')
 @Controller('board')
@@ -37,13 +41,40 @@ export class BoardController {
       return responseError(error.message || error);
     }
   }
+  @ApiOperation({ summary: 'Get all Project Board' })
+  @Get('get')
+  async getAll(
+    @Query() filter: FillterBoardDto,
+    @Pagination() pagination: PaginationOptions,
+  ) {
+    try {
+      const result = await this.boardService.getAll(filter, pagination);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
 
-  @Get()
+  @Get('/findall/:id')
   async findAll(): Promise<Board[]> {
     return this.boardService.findAll();
   }
+  @ApiOperation({ summary: 'Get a board by id' })
+  @Get('/getbyid/:id')
+  async getById(@Param('id') id: string) {
+    try {
+      const result = await this.boardService.getById(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
 
-  @Get(':id')
+  @Get('/findone/:id')
   async findOne(@Param('id') id: string): Promise<Board> {
     return this.boardService.findOne(id);
   }
@@ -65,6 +96,38 @@ export class BoardController {
   async removeID(@Param('id') id: string) {
     try {
       const result = await this.boardService.remove(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+
+  @ApiOperation({ summary: 'Add member Project board' })
+  @Patch('/addMember/:idmember/:idboard')
+  async addMember(
+    @Param('idmember') idmember: string,
+    @Param('idboard') idboard: string,
+  ) {
+    try {
+      const result = await this.boardService.addMember(idmember, idboard);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+
+  @ApiOperation({ summary: 'remove member' })
+  @Patch('/remove/:idmember/:idboard')
+  async removeMember(
+    @Param('idmember') idmember: string,
+    @Param('idboard') idboard: string,
+  ) {
+    try {
+      const result = await this.boardService.removeMember(idmember, idboard);
       return responseSuccess(result);
     } catch (error) {
       console.log(error.message);

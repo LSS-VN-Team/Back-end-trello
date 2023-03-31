@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/user.schema';
+import { UserService } from '../user/user.service';
 import { BoardController } from './board.controller';
 import { Board, BoardSchema } from './board.schema';
 import { BoardService } from './board.service';
@@ -12,9 +13,13 @@ import { BoardService } from './board.service';
         name: Board.name,
         schema: BoardSchema,
       },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
     ]),
   ],
   controllers: [BoardController],
-  providers: [BoardService],
+  providers: [BoardService, UserService],
 })
 export class BoardModule {}

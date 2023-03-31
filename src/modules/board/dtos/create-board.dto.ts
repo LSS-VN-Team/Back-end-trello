@@ -12,18 +12,18 @@ export class BoardDto {
   @IsString()
   admin: string;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  cardList: string[];
+  // @ApiProperty()
+  // @IsOptional()
+  // @IsString()
+  // cardList: string[];
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  memberList: string[];
+  // @ApiProperty()
+  // @IsOptional()
+  // @IsString()
+  // memberList: string[];
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  imgSource: string[];
+  // @ApiProperty()
+  // @IsOptional()
+  // @IsString()
+  // imgSource: string[];
 }

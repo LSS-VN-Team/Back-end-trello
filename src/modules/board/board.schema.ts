@@ -5,13 +5,13 @@ export type BoardDocument = HydratedDocument<Board>;
 
 @Schema()
 export class Board {
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, required: true })
   name: string;
 
   @Prop({ type: [String] })
   cardList: string[];
 
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   admin: string;
 
   @Prop({ type: [String] })
