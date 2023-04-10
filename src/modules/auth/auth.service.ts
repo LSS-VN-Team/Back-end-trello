@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/user.schema';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
+import { async } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -28,15 +29,26 @@ export class AuthService {
     } else {
       const payload = { uid: isExistsEmail._id };
       delete isExistsEmail.password;
-      return {
-        access_token: this.jwtService.sign(payload, {
-          secret: appConfig.jwt.JWT_SECRET_KEY,
-        }),
-        ...isExistsEmail,
+      const token = await this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_SECRET_KEY,
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+      const infoLogin = {
+        token: token,
+        user: data.email,
+        isExistsEmail,
       };
+      return infoLogin;
+      // return {
+      //   access_token: this.jwtService.sign(payload, {
+      //     secret: appConfig.jwt.JWT_SECRET_KEY,
+      //   }),
+      //   ...isExistsEmail,
+      // };
       //   return isExistsEmail.password;
     }
   }
+  // async checkAuth()`
   async register(data: RegisterDto) {
     const { email } = data;
     const isExistsEmail = await this.userModel.findOne({ email });
