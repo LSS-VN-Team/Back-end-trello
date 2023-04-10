@@ -3,22 +3,31 @@ import { HydratedDocument } from 'mongoose';
 
 export type BoardDocument = HydratedDocument<Board>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Board {
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, required: true })
   name: string;
 
   @Prop({ type: [String] })
   cardList: string[];
 
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   admin: string;
 
   @Prop({ type: [String] })
   memberList: string[];
 
   @Prop({ type: [String] })
-  imgSourd: string[];
+  imgSource: string[];
+
+  @Prop({ tpye: Date })
+  createdAt: Date;
+
+  @Prop({ tpye: Date })
+  updateddAt: Date;
+
+  @Prop({ type: Date })
+  clickedAt: Date;
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);
