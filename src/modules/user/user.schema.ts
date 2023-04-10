@@ -25,6 +25,9 @@ export class User {
 
   @Prop({ type: Date })
   updatedAt: Date;
+
+  @Prop({ type: [String] })
+  recentlyViewed: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

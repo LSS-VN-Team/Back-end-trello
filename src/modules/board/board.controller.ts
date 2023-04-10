@@ -19,6 +19,7 @@ import { BoardService } from './board.service';
 import { BoardDto } from './dtos/create-board.dto';
 import { FillterBoardDto } from './dtos/fillter-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
+import { get } from 'lodash';
 
 @ApiTags('Project Board')
 @Controller('board')
@@ -79,8 +80,8 @@ export class BoardController {
     return this.boardService.findOne(id);
   }
   @ApiOperation({ summary: 'Update a project board' })
-  @Put(':id')
-  async updateById(@Param('id') id: string, @Body() data: BoardDto) {
+  @Put(':id/:nameBoard')
+  async updateById(@Param('id') id: string, @Param('nameBoard') data: string) {
     try {
       const result = await this.boardService.update(id, data);
       return responseSuccess(result);
@@ -128,6 +129,33 @@ export class BoardController {
   ) {
     try {
       const result = await this.boardService.removeMember(idmember, idboard);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+  // @ApiOperation({ summary: 'addRecentlyViewed ' })
+  // @Patch('/addRecentlyViewed/:idUser/:idBoard')
+  // async addRecentlyViewed(
+  //   @Param('idUser') idUser: string,
+  //   @Param('idBoard') idboard: string,
+  // ) {
+  //   try {
+  //     const result = await this.boardService.addRecentlyViewed(idUser, idboard);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
+  @ApiOperation({ summary: 'move card ' })
+  @Patch('/movecard/:idCard/:pos')
+  async moveCard(@Param('idCard') idCard: string, @Param('pos') pos: number) {
+    try {
+      const result = await this.boardService.moveCard(idCard, pos);
       return responseSuccess(result);
     } catch (error) {
       console.log(error.message);

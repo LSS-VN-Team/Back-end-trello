@@ -1,35 +1,41 @@
 import { Logger } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Param } from '@nestjs/common/decorators';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common/decorators';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Image, ImageDocument } from './image.schema';
+import { Img, ImageDocument } from './image.schema';
+import { UpLoadModule } from '../upload/upload.module';
+import { ImageDto } from './dtos/image.dto';
 import { ImageService } from './image.service';
+import { responseError, responseSuccess } from '@app/core/base/base.controller';
+// import { ImageService } from './image.service';
+// import { ImageService } from './image.service';
 
-@ApiTags('Project Board')
-@Controller('board')
+@ApiTags('IMG')
+@Controller('IMG')
 export class ImageController {
-  @InjectModel(Image.name)
+  @InjectModel(Img.name)
   private readonly imageModel: Model<ImageDocument>;
-  constructor(private readonly imageService: ImageService) {}
-
+  constructor(
+    private readonly uploadModel: Model<UpLoadModule>,
+    private readonly imageService: ImageService,
+  ) {}
   private readonly logger = new Logger(ImageController.name);
-  @Get('/findall/:id')
-  async findAll(): Promise<Image[]> {
-    return this.imageService.findAll();
-  }
-  @Get('/findone/:id')
-  async findOne(@Param('id') id: string): Promise<Image> {
-    return this.imageService.findOne(id);
-  }
-  @Get(':id/url')
-  async getUrl(@Param('id') id: string): Promise<string> {
-    const image = await this.imageService.findOne(id);
 
-    if (!image) {
-      throw new Error(`Image with id ${id} not found`);
+  @ApiOperation({ summary: ' create image ' })
+  @Post()
+  async createImage(@Body() data: ImageDto) {
+    try {
+      const result = await this.imageService.createImage(data);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
     }
-
-    return image.name;
   }
+
+  // @ApiOperation({ summary: '' })
+  // @Get(':id')
+  // async getUrl(@Param('id') id: string) {}
 }

@@ -146,4 +146,15 @@ export class TaskController {
       return responseError(error.message || error);
     }
   }
+  @ApiOperation({ summary: 'Show All Task By IdCard' })
+  @Get('/showAllTask/:idCard')
+  async showAllTaskByIdCard(@Param('idCard') idCard: string) {
+    try {
+      const result = await this.taskService.showAllTaskByIdCard(idCard);
+      return responseSuccess(result);
+    } catch (error) {
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
 }

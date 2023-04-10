@@ -19,6 +19,15 @@ export class Board {
 
   @Prop({ type: [String] })
   imgSource: string[];
+
+  @Prop({ tpye: Date })
+  createdAt: Date;
+
+  @Prop({ tpye: Date })
+  updateddAt: Date;
+
+  @Prop({ type: Date })
+  clickedAt: Date;
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);

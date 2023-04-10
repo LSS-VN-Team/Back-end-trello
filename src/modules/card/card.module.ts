@@ -7,6 +7,8 @@ import { UserService } from '../user/user.service';
 import { CardController } from './card.controller';
 import { Card, CardSchema } from './card.schema';
 import { CardService } from './card.service';
+import { Task, TaskSchema } from '../task/task.schema';
+import { TaskService } from '../task/task.service';
 
 @Module({
   imports: [
@@ -23,9 +25,13 @@ import { CardService } from './card.service';
         name: Board.name,
         schema: BoardSchema,
       },
+      {
+        name: Task.name,
+        schema: TaskSchema,
+      },
     ]),
   ],
   controllers: [CardController],
-  providers: [CardService, BoardService, UserService],
+  providers: [CardService, BoardService, UserService, TaskService],
 })
 export class CardModule {}

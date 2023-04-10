@@ -7,6 +7,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common/decorators';
@@ -18,6 +19,7 @@ import { Card, CardDocument } from './card.schema';
 import { CardService } from './card.service';
 import { CardDto } from './dtos/create-card.dto';
 import { FillterCardDto } from './dtos/fillter-card.dto';
+import { async } from 'rxjs';
 
 @ApiTags(' Task card')
 @Controller('card')
@@ -52,7 +54,7 @@ export class CardController {
       return responseError(error.message || error);
     }
   }
-  @ApiOperation({ summary: 'Get all Project Board' })
+  @ApiOperation({ summary: 'Get all car' })
   @Get('get')
   async getAll(
     @Query() filter: FillterCardDto,
@@ -95,6 +97,39 @@ export class CardController {
   async removeID(@Param('id') id: string) {
     try {
       const result = await this.cardService.remove(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+  @ApiOperation({ summary: ' move in the card' })
+  @Patch('/moveInCard/:idTask/:pos')
+  async moveInCard(@Param('idTask') idTask: string, @Param('pos') pos: number) {
+    try {
+      const result = await this.cardService.moveInCard(idTask, pos);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+
+  @ApiOperation({ summary: ' move task to another' })
+  @Patch('/moveTaskToAnother/:idTask/:idPosCard/:pos')
+  async moveTaskToAnother(
+    @Param('idTask') idTask: string,
+    @Param('idPosCard') idPosCard: string,
+    @Param('pos') pos: number,
+  ) {
+    try {
+      const result = await this.cardService.moveTaskToAnother(
+        idTask,
+        idPosCard,
+        pos,
+      );
       return responseSuccess(result);
     } catch (error) {
       console.log(error.message);

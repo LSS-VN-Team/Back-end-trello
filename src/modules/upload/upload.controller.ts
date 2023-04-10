@@ -49,7 +49,7 @@ export class UpLoadController {
           process.env.HOST +
           ':' +
           process.env.PORT +
-          '/file/thumbs/' +
+          '/thumbs/' +
           x.filename
         );
       });

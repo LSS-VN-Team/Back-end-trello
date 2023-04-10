@@ -15,5 +15,8 @@ export class Card {
 
   @Prop({ type: [String] })
   discribe: string[];
+
+  @Prop({ type: String })
+  idBoard: string;
 }
 export const CardSchema = SchemaFactory.createForClass(Card);

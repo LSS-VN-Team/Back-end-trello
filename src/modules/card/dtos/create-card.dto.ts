@@ -10,5 +10,5 @@ export class CardDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  BoardId: string;
+  idBoard: string;
 }

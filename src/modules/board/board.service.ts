@@ -15,12 +15,18 @@ import { Board, BoardDocument } from './board.schema';
 import { BoardDto } from './dtos/create-board.dto';
 import { FillterBoardDto } from './dtos/fillter-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
+import { Card, CardDocument } from '../card/card.schema';
+import { privateDecrypt } from 'crypto';
+import { CardModule } from '../card/card.module';
+import { CardService } from '../card/card.service';
 
 @Injectable()
 export class BoardService {
   constructor(
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Card.name) private cardModel: Model<CardDocument>,
+    private cardService: CardService,
   ) {}
   async create(data: BoardDto) {
     const user = await this.userModel.findById(data.admin).lean();
@@ -67,31 +73,76 @@ export class BoardService {
   }
 
   async findOne(id: string): Promise<Board> {
+    await this.boardModel.findByIdAndUpdate(
+      id,
+      { clickedAt: new Date() },
+      { new: true },
+    );
     return this.boardModel.findById(id).exec();
   }
   async getById(id: string) {
     const board = await this.boardModel.findOne({ _id: id }).lean();
     if (!board) throw new Error(`board with id is ${id} does not exist`);
+
     return board;
   }
-  async update(id: string, data: BoardDto) {
+
+  // async addRecentlyViewed(idUser: string, idBoard: string) {
+  //   const user = await this.userModel.findById(idUser).lean();
+  //   let i = 0;
+  //   while (i < user.recentlyViewed.length) {
+  //     if (user.recentlyViewed.at(i) == idBoard) {
+  //       user.recentlyViewed.splice(i, 1);
+  //     } else i++;
+  //   }
+  //   user.recentlyViewed.push(idBoard);
+
+  //   await this.userModel.findByIdAndUpdate(
+  //     idUser,
+  //     { recentlyViewed: user.recentlyViewed },
+  //     { new: true },
+  //   );
+  //   return user;
+  // }
+  async update(id: string, data: string) {
     const board = await this.boardModel.findById({ _id: id }).lean();
     if (!board) throw new Error(`Board with id is ${id} does not exist`);
 
-    const userInstance = plainToInstance(Board, data);
+    // const userInstance = plainToInstance(Board, data);
 
-    removeKeyUndefined(userInstance);
+    // removeKeyUndefined(userInstance);
 
-    return this.boardModel.findByIdAndUpdate(
+    // return this.boardModel.findByIdAndUpdate(
+    //   id,
+    //   { ...board, ...userInstance, updatedAt: new Date() },
+    //   { new: true },
+    // );
+
+    return await this.boardModel.findByIdAndUpdate(
       id,
-      { ...board, ...userInstance, updatedAt: new Date() },
+      { name: data },
       { new: true },
     );
   }
 
   async remove(id: string) {
-    const board = await this.boardModel.findOne({ _id: id }).lean();
-    if (!board) throw new Error(`Board with id is ${id} does not exist`);
+    const board = await this.boardModel.findById(id).lean();
+    if (!board)
+      throw new Error(`Project Board with id is ${id} does not exist`);
+    else {
+      for (let i = 0; i < board.memberList.length; i++) {
+        const member = await this.userModel
+          .findById(board.memberList.at(i))
+          .lean();
+        for (let j = 0; j < member.projectBoardList.length; j++)
+          if (member.projectBoardList.at(i) == id) {
+            member.projectBoardList.splice(i, 1);
+            break;
+          }
+      }
+      for (let i = board.cardList.length - 1; i >= 0; i--)
+        this.cardService.remove(board.cardList.at(i));
+    }
     return this.boardModel.findByIdAndDelete(id);
   }
 
@@ -104,7 +155,7 @@ export class BoardService {
       newDataMember.push(idBoard);
       await this.userModel.findByIdAndUpdate(
         idMember,
-        { boardList: newDataMember },
+        { projectBoardList: newDataMember },
         { new: true },
       );
       const board = await this.boardModel.findById(idBoard).lean();
@@ -152,5 +203,31 @@ export class BoardService {
         return [member, board];
       }
     }
+  }
+  async moveCard(idCard: string, pos: number) {
+    const card = await this.cardModel.findById(idCard).lean();
+    const board = await this.boardModel.findById(card.idBoard).lean();
+    for (let i = 0; i < board.cardList.length; i++) {
+      if (board.cardList.at(i) == idCard) {
+        const index = i;
+
+        if (pos < index) {
+          board.cardList.splice(pos, 0, idCard);
+          board.cardList.splice(index + 1, 1);
+        } else {
+          board.cardList.splice(pos + 1, 0, idCard);
+          board.cardList.splice(index, 1);
+        }
+        break;
+      }
+    }
+    await this.boardModel.findByIdAndUpdate(
+      card.idBoard,
+      {
+        cardList: board.cardList,
+      },
+      { new: true },
+    );
+    return board;
   }
 }

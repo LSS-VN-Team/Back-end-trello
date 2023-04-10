@@ -25,8 +25,8 @@ export class TaskService {
   async getAll(filter: TaskFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
-    if (filter.title) {
-      query.title = { $regex: filter.title, $option: 'i' };
+    if (filter.idCard) {
+      query.idCard = filter.idCard;
     }
 
     const countDocument = this.taskModel.countDocuments(query);
@@ -166,5 +166,16 @@ export class TaskService {
         return task;
       }
     }
+  }
+  async showAllTaskByIdCard(idcard: string) {
+    const newObject = [{ idTask: '1', title: '2' }];
+    newObject.splice(0, 1);
+    const card = await this.cardModel.findById(idcard).lean();
+    for (let i = 0; i < card.taskList.length; i++) {
+      const task = await this.taskModel.findById(card.taskList.at(i)).lean();
+      const value = { idTask: task._id.toString(), title: task.title };
+      newObject.push(value);
+    }
+    return newObject;
   }
 }

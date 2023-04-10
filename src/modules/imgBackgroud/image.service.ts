@@ -1,22 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Image, ImageDocument } from './image.schema';
+import { Img, ImageDocument } from './image.schema';
+import { UpLoadModule } from '../upload/upload.module';
+import { async } from 'rxjs';
+import { ImageDto } from './dtos/image.dto';
 @Injectable()
 export class ImageService {
   constructor(
-    @InjectModel(Image.name) private imageModel: Model<ImageDocument>,
+    @InjectModel(Img.name) private imageModel: Model<ImageDocument>,
+    private uploadModel: Model<UpLoadModule>,
   ) {}
 
-  async findAll(): Promise<Image[]> {
-    return this.imageModel.find().exec();
-  }
-
-  async findOne(id: string): Promise<Image> {
-    return this.imageModel.findById(id).exec();
-  }
-
-  async findById(id: string): Promise<Image> {
-    return this.imageModel.findById(id).exec();
+  async createImage(data: ImageDto) {
+    const image = new this.uploadModel(data);
+    const newImage = await image.save();
+    return newImage;
   }
 }
