@@ -63,8 +63,8 @@ export class BoardController {
     }
   }
   @ApiOperation({ summary: 'Update Board' })
-  @Patch('id')
-  async update(@Param('id') id: string, @Body() data: UpdateBoardDto) {
+  @Patch('/:id/:nameBoard')
+  async update(@Param('id') id: string, @Param('nameBoard') data: string) {
     try {
       const result = await this.boardService.update(id, data);
       return responseSuccess(result);

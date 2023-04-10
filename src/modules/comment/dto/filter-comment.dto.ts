@@ -5,5 +5,5 @@ export class CommentFilterDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  idUser: string;
+  content: string;
 }

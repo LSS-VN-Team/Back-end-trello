@@ -6,12 +6,13 @@ import { CM, CommentSchema } from '../comment/comment.schema';
 import { CommentService } from '../comment/comment.service';
 import { Task, TaskSchema } from '../Task/task.schema';
 import { TaskService } from '../Task/task.service';
-import { UserModule } from '../user/user.module';
+
 import { User, UserSchema } from '../user/user.schema';
 import { UserService } from '../user/user.service';
 import { BoardController } from './board.controller';
 import { Board, BoardSchema } from './board.schema';
 import { BoardService } from './board.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { BoardService } from './board.service';
     UserService,
     TaskService,
     CommentService,
+    JwtService,
   ],
 })
 export class BoardModule {}

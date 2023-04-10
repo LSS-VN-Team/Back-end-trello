@@ -8,6 +8,9 @@ import {
   Delete,
   Query,
   Logger,
+  Req,
+  Request,
+  Headers,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,6 +19,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserFilterDto } from './dto/filter-user.dto';
 import { Pagination, PaginationOptions } from '@app/common';
 import { responseError, responseSuccess } from '@app/core/base/base.controller';
+import { Auth, CurrentUser } from '@app/core';
 
 @ApiTags('user')
 @Controller('user')
@@ -25,12 +29,12 @@ export class UserController {
 
   @ApiOperation({ summary: 'Find all user' })
   @Get()
-  async findAll(
+  async getAll(
     @Query() filter: UserFilterDto,
     @Pagination() Pagination: PaginationOptions,
   ) {
     try {
-      const result = await this.userService.findAll(filter, Pagination);
+      const result = await this.userService.getAll(filter, Pagination);
       return responseSuccess(result);
     } catch (error) {
       this.logger.error(error.stack);
@@ -38,16 +42,23 @@ export class UserController {
     }
   }
 
+  // @ApiOperation({ summary: 'Find one user' })
+  // @Auth()
+  // @Get('profile')
+  // async getOne(@CurrentUser('id') id: string) {
+  //   try {
+  //     const result = await this.userService.findOne(id);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
+
   @ApiOperation({ summary: 'Find one user' })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    try {
-      const result = await this.userService.findOne(id);
-      return responseSuccess(result);
-    } catch (error) {
-      this.logger.error(error.stack);
-      return responseError(error.message || error);
-    }
+  async getOne(@Param('id') id: string) {
+    return this.userService.getOne(id);
   }
 
   @ApiOperation({ summary: 'Update user' })

@@ -26,7 +26,7 @@ export class CardService {
     const { limit, page, skip } = pagination;
     const query: any = {};
     if (filter.name) {
-      query.email = { $regex: filter.name, $option: 'i' };
+      query.name = { $regex: filter.name, $options: '$i' };
     }
 
     const countDocument = this.cardModel.countDocuments(query);
@@ -60,39 +60,35 @@ export class CardService {
         { cardList: board.cardList },
         { new: true },
       );
-      return [newCard, board];
+      return newCard;
     }
   }
 
-  async removeAll(idCard: string){
+  async removeAll(idCard: string) {
     const card = await this.cardModel.findById(idCard).lean();
-    for (let i =0;i< card.taskList.length ; i++)
-    this.taskSerVice.remove(card.taskList.at(0));
+    for (let i = 0; i < card.taskList.length; i++)
+      this.taskSerVice.remove(card.taskList.at(0));
     return this.cardModel.findByIdAndDelete(idCard);
-}
-
-async removeUpToDown(idCard : string){
-  const card = await this.cardModel.findById(idCard).lean();
-  while (card.taskList.length)
-      {
-        this.taskSerVice.removeUpToDown(card.taskList.at(0));
-        card.taskList.splice(0,1);
-      }
-
-  return this.cardModel.findByIdAndDelete(idCard);
-  
   }
-  
-  
+
+  async removeUpToDown(idCard: string) {
+    const card = await this.cardModel.findById(idCard).lean();
+    while (card.taskList.length) {
+      this.taskSerVice.removeUpToDown(card.taskList.at(0));
+      card.taskList.splice(0, 1);
+    }
+
+    return this.cardModel.findByIdAndDelete(idCard);
+  }
+
   async remove(idCard: string) {
     const card = await this.cardModel.findById(idCard).lean();
     if (!card) throw new Error(`Card with id is ${idCard} does not exist`);
     else {
-      while(card.taskList.length!=0)
-        {
-          this.taskSerVice.removeUpToDown(card.taskList.at(0));
-          card.taskList.splice(0,1);
-        }
+      while (card.taskList.length != 0) {
+        this.taskSerVice.removeUpToDown(card.taskList.at(0));
+        card.taskList.splice(0, 1);
+      }
       const board = await this.boardModel.findById(card.idBoard).lean();
       if (!board)
         throw new Error(`Project Board with id is ${idCard} does not exist`);
@@ -111,16 +107,22 @@ async removeUpToDown(idCard : string){
       return this.cardModel.findByIdAndDelete(idCard);
     }
   }
-  async update(id: string, data: UpdateCardDto) {
+  async update(id: string, data: string) {
     const card = await this.cardModel.findById(id).lean();
     if (!card) throw new Error(`Card with id is ${id} does not exist`);
 
-    const CardInstance = plainToInstance(Card, data);
+    // const CardInstance = plainToInstance(Card, data);
 
-    removeKeyUndefined(CardInstance);
-    return this.cardModel.findByIdAndUpdate(
+    // removeKeyUndefined(CardInstance);
+    // return this.cardModel.findByIdAndUpdate(
+    //   id,
+    //   { ...card, ...CardInstance, updatedAt: new Date() },
+    //   { new: true },
+    // );
+
+    return await this.cardModel.findByIdAndUpdate(
       id,
-      { ...card, ...CardInstance, updatedAt: new Date() },
+      { name: data },
       { new: true },
     );
   }

@@ -61,8 +61,8 @@ export class CardController {
     }
   }
   @ApiOperation({ summary: 'Update Card' })
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateCardDto) {
+  @Patch(':id/:nameCard')
+  async update(@Param('id') id: string, @Param('nameCard') data: string) {
     try {
       const result = await this.cardService.update(id, data);
       return responseSuccess(result);

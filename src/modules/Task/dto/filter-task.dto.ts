@@ -5,5 +5,5 @@ export class TaskFilterDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  title: string;
+  idCard: string;
 }

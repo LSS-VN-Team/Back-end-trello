@@ -11,6 +11,7 @@ import { UserService } from '../user/user.service';
 import { CardController } from './card.controller';
 import { Card, CardSchema } from './card.schema';
 import { CardService } from './card.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CardService } from './card.service';
     UserService,
     TaskService,
     CommentService,
+    JwtService,
   ],
 })
 export class CardModule {}

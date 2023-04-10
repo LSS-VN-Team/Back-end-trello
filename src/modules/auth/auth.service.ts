@@ -7,6 +7,8 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/user.schema';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
+import { now } from 'lodash';
+import moment from 'moment';
 // import { env } from "process";
 
 @Injectable({})
@@ -20,7 +22,6 @@ export class AuthService {
   async login(data: LoginDto) {
     const { email } = data;
     const isExistEmail = await this.userModel.findOne({ email }).lean();
-
     if (isExistEmail && isExistEmail.email != email) {
       throw new Error('This account is not correct!');
     }
@@ -30,7 +31,7 @@ export class AuthService {
       const payload = { uid: isExistEmail._id };
       delete isExistEmail.password;
       return {
-        access_token: this.jwtService.sign(payload, {
+        token: this.jwtService.sign(payload, {
           secret: appConfig.jwt.JWT_SECRET_KEY,
         }),
         ...isExistEmail,

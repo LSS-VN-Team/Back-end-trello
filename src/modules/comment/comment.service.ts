@@ -25,8 +25,8 @@ export class CommentService {
   async findAll(filter: CommentFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
-    if (filter.idUser) {
-      query.idUser = { $regex: filter.idUser, $option: 'i' };
+    if (filter.content) {
+      query.content = { $regex: filter.content, $options: '$i' };
     }
 
     const countDocument = this.commentModel.countDocuments(query);
@@ -60,7 +60,7 @@ export class CommentService {
         { commentList: task.commentList },
         { new: true },
       );
-      return [newComment, task];
+      return newComment;
     }
   }
 

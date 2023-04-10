@@ -2,7 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export type BoardDocument = HydratedDocument<Board>;
-@Schema()
+
+@Schema({ timestamps: true })
 export class Board {
   @Prop({ type: String, required: true })
   name: string;
@@ -18,5 +19,11 @@ export class Board {
 
   @Prop({ type: [String] })
   imgSource: string[];
+
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 export const BoardSchema = SchemaFactory.createForClass(Board);

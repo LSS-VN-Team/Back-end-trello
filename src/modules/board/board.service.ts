@@ -30,7 +30,7 @@ export class BoardService {
     const { limit, page, skip } = pagination;
     const query: any = {};
     if (filter.name) {
-      query.name = { $regex: filter.name, $option: 'i' };
+      query.name = { $regex: filter.name, $options: '$i' };
     }
 
     const countDocument = this.boardModel.countDocuments(query);
@@ -70,16 +70,26 @@ export class BoardService {
       return board;
     }
   }
+
+  async removeUptoDown(id: string) {
+    const board = await this.boardModel.findById(id).lean();
+    while (board.cardList.length) {
+      this.cardService.removeUpToDown(board.cardList.at(0));
+      board.cardList.splice(0, 1);
+    }
+
+    return this.boardModel.findByIdAndDelete(id);
+  }
+
   async remove(id: string) {
     const board = await this.boardModel.findById(id).lean();
     if (!board)
       throw new Error(`Project Board with id is ${id} does not exist`);
     else {
-      while(board.cardList.length!=0)
-        {
-          this.cardService.removeUpToDown(board.cardList.at(0));
-          board.cardList.splice(0,1);
-        }
+      while (board.cardList.length != 0) {
+        this.cardService.removeUpToDown(board.cardList.at(0));
+        board.cardList.splice(0, 1);
+      }
       for (let i = 0; i < board.memberList.length; i++) {
         const member = await this.userModel
           .findById(board.memberList.at(i))
@@ -90,25 +100,31 @@ export class BoardService {
             break;
           }
       }
-      for (let i=board.cardList.length-1;i>=0;i--)
+      for (let i = board.cardList.length - 1; i >= 0; i--)
         this.cardService.remove(board.cardList.at(i));
     }
     return this.boardModel.findByIdAndDelete(id);
   }
 
-  async update(id: string, data: UpdateBoardDto) {
+  async update(id: string, data: string) {
     const board = await this.boardModel.findById(id).lean();
     if (!board)
       throw new Error(`Project Board with id is ${id} does not exist`);
 
-    const boardInstance = plainToInstance(Board, data);
+    // const boardInstance = plainToInstance(Board, data);
 
-    removeKeyUndefined(boardInstance);
-    return this.boardModel.findByIdAndUpdate(
+    // removeKeyUndefined(boardInstance);
+    // return this.boardModel.findByIdAndUpdate(
+    //   id,
+    //   { ...board, ...boardInstance, updatedAt: new Date() },
+    //   { new: true },
+    // );
+    const newBoard = await this.boardModel.findByIdAndUpdate(
       id,
-      { ...board, ...boardInstance, updatedAt: new Date() },
+      { name: data },
       { new: true },
     );
+    return newBoard;
   }
 
   async addMember(idMember: string, idBoard: string) {
@@ -133,7 +149,7 @@ export class BoardService {
           { memberList: board.memberList },
           { new: true },
         );
-        return [member, board];
+        return board;
       }
     }
   }
@@ -173,7 +189,7 @@ export class BoardService {
           { memberList: board.memberList },
           { new: true },
         );
-        return [member, board];
+        return board;
       }
     }
   }

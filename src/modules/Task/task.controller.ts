@@ -64,9 +64,7 @@ export class TaskController {
 
   @ApiOperation({ summary: 'Delete Task' })
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-  ) {
+  async remove(@Param('id') id: string) {
     try {
       const result = await this.taskService.remove(id);
       return responseSuccess(result);
@@ -77,8 +75,8 @@ export class TaskController {
   }
 
   @ApiOperation({ summary: 'Update Task' })
-  @Patch('id')
-  async update(@Param('id') id: string, @Body() data: UpdateTaskDto) {
+  @Patch(':id/:title')
+  async update(@Param('id') id: string, @Param('title') data: string) {
     try {
       const result = await this.taskService.update(id, data);
       return responseSuccess(result);
@@ -147,4 +145,16 @@ export class TaskController {
       return responseError(error.message || error);
     }
   }
+
+  // @ApiOperation({summary: 'Show All Task By IdCard'})
+  // @Get('/showAllTask/:idCard')
+  // async showAllTaskByIdCard(@Param('idCard') idCard: string){
+  //   try {
+  //     const result = await this.taskService.showAllTaskByIdCard(idCard);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
 }

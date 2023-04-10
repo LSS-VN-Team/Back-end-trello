@@ -11,6 +11,7 @@ import { UserService } from '../user/user.service';
 import { TaskController } from './task.controller';
 import { Task, TaskSchema } from './task.schema';
 import { TaskService } from './task.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TaskService } from './task.service';
     BoardService,
     UserService,
     CommentService,
+    JwtService,
   ],
 })
 export class TaskModule {}

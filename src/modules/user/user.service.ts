@@ -10,19 +10,22 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
 import { Model } from 'mongoose';
-import { UserModule } from './user.module';
+
 import { UserFilterDto } from './dto/filter-user.dto';
 import { plainToInstance } from 'class-transformer';
+import * as jwt from 'jsonwebtoken';
+import { appConfig } from '@app/core';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findAll(filter: UserFilterDto, pagination: PaginationOptions) {
+  async getAll(filter: UserFilterDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
     if (filter.email) {
-      query.email = { $regex: filter.email, $option: 'i' };
+      query.email = { $regex: filter.email, $options: '$i' };
     }
 
     const countDocument = this.userModel.countDocuments(query);
@@ -38,7 +41,7 @@ export class UserService {
     // return `This action returns all user`;
   }
 
-  async findOne(id: string) {
+  async getOne(id: string) {
     const user = await this.userModel.findById({ _id: id }).lean();
     if (!user) throw new Error(`User with id is ${id} does not exist`);
     return user;
@@ -47,7 +50,6 @@ export class UserService {
   async update(id: string, data: UpdateUserDto) {
     const user = await this.userModel.findById(id).lean();
     if (!user) throw new Error(`User with id is ${id} does not exist`);
-
     const userInstance = plainToInstance(User, data);
 
     removeKeyUndefined(userInstance);
@@ -61,6 +63,7 @@ export class UserService {
   async remove(id: string) {
     const user = await this.userModel.findById(id).lean();
     if (!user) throw new Error(`User with id is ${id} does not exist`);
+
     return this.userModel.findByIdAndDelete(id);
   }
 
@@ -69,4 +72,5 @@ export class UserService {
     if (!user) throw new Error(`User with id is ${idUser} does not exist`);
     return user.boardList.push(idBoard);
   }
+
 }
