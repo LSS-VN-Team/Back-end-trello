@@ -67,19 +67,55 @@ export class BoardService {
       data: Board,
     };
   }
+  async getProjectBoard(idUser: string) {
+    const user = await this.userModel.findById(idUser).lean();
+    const obj: Board[] = [];
+    // console.log('aaaaâ!!');
+
+    for (let i = 0; i < user.projectBoardList.length; i++) {
+      const board = await this.boardModel
+        .findById(user.projectBoardList.at(i))
+        .lean();
+      obj.push(board);
+    }
+
+    return obj;
+  }
+  async getrecentlyViewed(idUser: string) {
+    const user = await this.userModel.findById(idUser).lean();
+    const obj: Board[] = [];
+    for (let i = 0; i < user.recentlyViewed.length; i++) {
+      const board = await this.boardModel
+        .findById(user.recentlyViewed.at(i))
+        .lean();
+      obj.push(board);
+    }
+
+    return obj;
+  }
+  async getguestWorkSpaces(idUser: string) {
+    const user = await this.userModel.findById(idUser).lean();
+    const obj: Board[] = [];
+    for (let i = 0; i < user.guestWorkSpaces.length; i++) {
+      const board = await this.boardModel
+        .findById(user.guestWorkSpaces.at(i))
+        .lean();
+      obj.push(board);
+    }
+
+    return obj;
+  }
 
   async findAll(): Promise<Board[]> {
     return this.boardModel.find().exec();
   }
 
   async findOne(id: string): Promise<Board> {
-    await this.boardModel.findByIdAndUpdate(
-      id,
-      { clickedAt: new Date() },
-      { new: true },
-    );
-    return this.boardModel.findById(id).exec();
+    const board = await this.boardModel.findById({ _id: id }).lean();
+    if (!board) throw new Error(`Board with id is ${id} does not exist`);
+    return board;
   }
+
   async getById(id: string) {
     const board = await this.boardModel.findOne({ _id: id }).lean();
     if (!board) throw new Error(`board with id is ${id} does not exist`);
@@ -87,23 +123,24 @@ export class BoardService {
     return board;
   }
 
-  // async addRecentlyViewed(idUser: string, idBoard: string) {
-  //   const user = await this.userModel.findById(idUser).lean();
-  //   let i = 0;
-  //   while (i < user.recentlyViewed.length) {
-  //     if (user.recentlyViewed.at(i) == idBoard) {
-  //       user.recentlyViewed.splice(i, 1);
-  //     } else i++;
-  //   }
-  //   user.recentlyViewed.push(idBoard);
+  async addRecentlyViewed(idUser: string, idBoard: string) {
+    const user = await this.userModel.findById(idUser).lean();
+    user.recentlyViewed.splice(0, 0, idBoard);
+    let i = 1;
+    while (i < user.recentlyViewed.length) {
+      if (user.recentlyViewed.at(i) == idBoard) {
+        user.recentlyViewed.splice(i, 1);
+      } else i++;
+    }
 
-  //   await this.userModel.findByIdAndUpdate(
-  //     idUser,
-  //     { recentlyViewed: user.recentlyViewed },
-  //     { new: true },
-  //   );
-  //   return user;
-  // }
+    await this.userModel.findByIdAndUpdate(
+      idUser,
+      { recentlyViewed: user.recentlyViewed },
+      { new: true },
+    );
+    return user;
+  }
+
   async update(id: string, data: string) {
     const board = await this.boardModel.findById({ _id: id }).lean();
     if (!board) throw new Error(`Board with id is ${id} does not exist`);
@@ -125,20 +162,53 @@ export class BoardService {
     );
   }
 
+  async removeUptoDown(id: string) {
+    const board = await this.boardModel.findById(id).lean();
+    while (board.cardList.length) {
+      this.cardService.removeUpToDown(board.cardList.at(0));
+      board.cardList.splice(0, 1);
+    }
+
+    return this.boardModel.findByIdAndDelete(id);
+  }
+
   async remove(id: string) {
     const board = await this.boardModel.findById(id).lean();
     if (!board)
       throw new Error(`Project Board with id is ${id} does not exist`);
     else {
+      while (board.cardList.length != 0) {
+        this.cardService.removeUpToDown(board.cardList.at(0));
+        board.cardList.splice(0, 1);
+      }
       for (let i = 0; i < board.memberList.length; i++) {
         const member = await this.userModel
           .findById(board.memberList.at(i))
           .lean();
         for (let j = 0; j < member.projectBoardList.length; j++)
-          if (member.projectBoardList.at(i) == id) {
-            member.projectBoardList.splice(i, 1);
+          if (member.projectBoardList.at(j) == id) {
+            member.projectBoardList.splice(j, 1);
             break;
           }
+        for (let j = 0; j < member.recentlyViewed.length; j++)
+          if (member.recentlyViewed.at(j) == id) {
+            member.recentlyViewed.splice(j, 1);
+            break;
+          }
+        for (let j = 0; j < member.guestWorkSpaces.length; j++)
+          if (member.guestWorkSpaces.at(j) == id) {
+            member.guestWorkSpaces.splice(j, 1);
+            break;
+          }
+        await this.userModel.findByIdAndUpdate(
+          member._id.toString(),
+          {
+            projectBoardList: member.projectBoardList,
+            recentlyViewed: member.recentlyViewed,
+            guestWorkSpaces: member.guestWorkSpaces,
+          },
+          { new: true },
+        );
       }
       for (let i = board.cardList.length - 1; i >= 0; i--)
         this.cardService.remove(board.cardList.at(i));
@@ -151,11 +221,11 @@ export class BoardService {
     if (!member)
       throw new Error(`Member with id is ${idMember} does not exist`);
     else {
-      const newDataMember: string[] = member.projectBoardList;
+      const newDataMember: string[] = member.guestWorkSpaces;
       newDataMember.push(idBoard);
       await this.userModel.findByIdAndUpdate(
         idMember,
-        { projectBoardList: newDataMember },
+        { guestWorkSpaces: newDataMember },
         { new: true },
       );
       const board = await this.boardModel.findById(idBoard).lean();

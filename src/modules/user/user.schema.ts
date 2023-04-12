@@ -28,6 +28,9 @@ export class User {
 
   @Prop({ type: [String] })
   recentlyViewed: string[];
+
+  @Prop({ type: [String] })
+  guestWorkSpaces: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

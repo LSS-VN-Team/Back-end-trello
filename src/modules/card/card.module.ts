@@ -9,6 +9,8 @@ import { Card, CardSchema } from './card.schema';
 import { CardService } from './card.service';
 import { Task, TaskSchema } from '../task/task.schema';
 import { TaskService } from '../task/task.service';
+import { CM, CommentSchema } from '../comment/comment.schema';
+import { CommentService } from '../comment/comment.service';
 
 @Module({
   imports: [
@@ -29,9 +31,19 @@ import { TaskService } from '../task/task.service';
         name: Task.name,
         schema: TaskSchema,
       },
+      {
+        name: CM.name,
+        schema: CommentSchema,
+      },
     ]),
   ],
   controllers: [CardController],
-  providers: [CardService, BoardService, UserService, TaskService],
+  providers: [
+    CardService,
+    BoardService,
+    UserService,
+    TaskService,
+    CommentService,
+  ],
 })
 export class CardModule {}

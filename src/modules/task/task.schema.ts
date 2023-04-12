@@ -5,6 +5,9 @@ export type TaskDocument = HydratedDocument<Task>;
 
 @Schema({ timestamps: true })
 export class Task {
+  @Prop({ type: String })
+  id: string;
+
   @Prop({ type: String, required: true })
   title: string;
 

@@ -64,7 +64,7 @@ export class TaskController {
   }
 
   @ApiOperation({ summary: 'Delete Task' })
-  @Delete(':idCard/:idTask')
+  @Delete(':idTask')
   async remove(@Param('idTask') idTask: string) {
     try {
       const result = await this.taskService.remove(idTask);

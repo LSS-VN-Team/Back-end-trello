@@ -9,6 +9,9 @@ import { UserService } from '../user/user.service';
 import { TaskController } from './task.controller';
 import { Task, TaskSchema } from './task.schema';
 import { TaskService } from './task.service';
+import { CM, CommentSchema } from '../comment/comment.schema';
+import { CommentService } from '../comment/comment.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -29,9 +32,20 @@ import { TaskService } from './task.service';
         name: Card.name,
         schema: CardSchema,
       },
+      {
+        name: CM.name,
+        schema: CommentSchema,
+      },
     ]),
   ],
   controllers: [TaskController],
-  providers: [TaskService, CardService, BoardService, UserService],
+  providers: [
+    TaskService,
+    CardService,
+    BoardService,
+    UserService,
+    CommentService,
+    JwtService,
+  ],
 })
 export class TaskModule {}

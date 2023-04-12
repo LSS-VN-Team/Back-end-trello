@@ -20,6 +20,7 @@ import { CardService } from './card.service';
 import { CardDto } from './dtos/create-card.dto';
 import { FillterCardDto } from './dtos/fillter-card.dto';
 import { async } from 'rxjs';
+import { Task } from '../task/task.schema';
 
 @ApiTags(' Task card')
 @Controller('card')
@@ -54,8 +55,22 @@ export class CardController {
       return responseError(error.message || error);
     }
   }
-  @ApiOperation({ summary: 'Get all car' })
-  @Get('get')
+
+  // @ApiOperation({ summary: 'Get a  id' })
+  // @Get('/tasklist/:id')
+  // async findall(@Param('id') id: Task) {
+  //   try {
+  //     const result = await this.cardService.findAll(id);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
+
+  @ApiOperation({ summary: 'Get all card' })
+  @Get('')
   async getAll(
     @Query() filter: FillterCardDto,
     @Pagination() pagination: PaginationOptions,
@@ -70,15 +85,6 @@ export class CardController {
     }
   }
 
-  @Get()
-  async findAll(): Promise<Card[]> {
-    return this.cardService.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Card> {
-    return this.cardService.findOne(id);
-  }
   @ApiOperation({ summary: 'Update a Task card' })
   @Put(':id')
   async updateById(@Param('id') id: string, @Body() data: CardDto) {

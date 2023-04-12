@@ -77,68 +77,68 @@ export class UserService {
     if (!user) throw new Error(`User with id is ${id} does not exist`);
     return this.userModel.findByIdAndDelete(id);
   }
-  async getGuestWorkSpaces(idUser: string) {
-    const result: string[] = [];
-    const user = await this.userModel.findById(idUser).lean();
+  // async getGuestWorkSpaces(idUser: string) {
+  //   const result: string[] = [];
+  //   const user = await this.userModel.findById(idUser).lean();
 
-    for (let i = 0; i < user.projectBoardList.length; i++) {
-      const board = await this.boardModel
-        .findById(user.projectBoardList.at(i))
-        .lean();
-      console.log(board._id.toString());
+  //   for (let i = 0; i < user.projectBoardList.length; i++) {
+  //     const board = await this.boardModel
+  //       .findById(user.projectBoardList.at(i))
+  //       .lean();
+  //     console.log(board._id.toString());
 
-      if (board.admin != idUser) result.push(user.projectBoardList.at(i));
-    }
-    return result;
-  }
+  //     if (board.admin != idUser) result.push(user.projectBoardList.at(i));
+  //   }
+  //   return result;
+  // }
 
-  async getRecentlyViewed(idUser: string) {
-    // const result: string[] = [];
-    // const user = await this.userModel.findById(idUser).lean();
-    // if (user.recentlyViewed.length >= 3) {
-    //   for (
-    //     let i = user.recentlyViewed.length - 1;
-    //     i >= user.recentlyViewed.length - 3;
-    //     i--
-    //   )
-    //     result.push(user.recentlyViewed.at(i));
-    // } else {
-    //   for (let i = user.recentlyViewed.length - 1; i >= 0; i--)
-    //     result.push(user.recentlyViewed.at(i));
-    // }
-    // return result;
-    const user = await this.userModel.findById(idUser).lean();
-    for (let i = 0; i < user.projectBoardList.length; i++) {
-      const board = await this.boardModel
-        .findById(user.projectBoardList.at(i))
-        .lean();
-      if (board.clickedAt) user.recentlyViewed.push(board._id.toString());
-    }
-    for (let i = 0; i < user.recentlyViewed.length - 1; i++)
-      for (let j = i + 1; j < user.recentlyViewed.length; j++) {
-        const boardI = await this.boardModel.findById(
-          user.recentlyViewed.at(i),
-        );
-        const boardJ = await this.boardModel.findById(
-          user.recentlyViewed.at(j),
-        );
+  // async getRecentlyViewed(idUser: string) {
+  //   // const result: string[] = [];
+  //   // const user = await this.userModel.findById(idUser).lean();
+  //   // if (user.recentlyViewed.length >= 3) {
+  //   //   for (
+  //   //     let i = user.recentlyViewed.length - 1;
+  //   //     i >= user.recentlyViewed.length - 3;
+  //   //     i--
+  //   //   )
+  //   //     result.push(user.recentlyViewed.at(i));
+  //   // } else {
+  //   //   for (let i = user.recentlyViewed.length - 1; i >= 0; i--)
+  //   //     result.push(user.recentlyViewed.at(i));
+  //   // }
+  //   // return result;
+  //   const user = await this.userModel.findById(idUser).lean();
+  //   for (let i = 0; i < user.projectBoardList.length; i++) {
+  //     const board = await this.boardModel
+  //       .findById(user.projectBoardList.at(i))
+  //       .lean();
+  //     if (board.clickedAt) user.recentlyViewed.push(board._id.toString());
+  //   }
+  //   for (let i = 0; i < user.recentlyViewed.length - 1; i++)
+  //     for (let j = i + 1; j < user.recentlyViewed.length; j++) {
+  //       const boardI = await this.boardModel.findById(
+  //         user.recentlyViewed.at(i),
+  //       );
+  //       const boardJ = await this.boardModel.findById(
+  //         user.recentlyViewed.at(j),
+  //       );
 
-        const MMI = moment(boardI.clickedAt);
-        const MMJ = moment(boardJ.clickedAt);
-        if (MMI.diff(MMJ, 'second') < 0) {
-          [user.recentlyViewed[i], user.recentlyViewed[j]] = [
-            user.recentlyViewed[j],
-            user.recentlyViewed[i],
-          ];
-        }
-      }
-    if (user.recentlyViewed.length > 5)
-      user.recentlyViewed.splice(4, user.recentlyViewed.length - 4);
-    await this.userModel.findByIdAndUpdate(
-      idUser,
-      { recentlyViewed: user.recentlyViewed },
-      { new: true },
-    );
-    return user;
-  }
+  //       const MMI = moment(boardI.clickedAt);
+  //       const MMJ = moment(boardJ.clickedAt);
+  //       if (MMI.diff(MMJ, 'second') < 0) {
+  //         [user.recentlyViewed[i], user.recentlyViewed[j]] = [
+  //           user.recentlyViewed[j],
+  //           user.recentlyViewed[i],
+  //         ];
+  //       }
+  //     }
+  //   if (user.recentlyViewed.length > 5)
+  //     user.recentlyViewed.splice(4, user.recentlyViewed.length - 4);
+  //   await this.userModel.findByIdAndUpdate(
+  //     idUser,
+  //     { recentlyViewed: user.recentlyViewed },
+  //     { new: true },
+  //   );
+  //   return user;
+  // }
 }

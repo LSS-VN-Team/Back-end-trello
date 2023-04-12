@@ -75,6 +75,43 @@ export class BoardController {
     }
   }
 
+  @ApiOperation({ summary: 'Get a project board list by id' })
+  @Get('/getprojectBoardList/:idUser')
+  async getprojectBoardList(@Param('idUser') id: string) {
+    try {
+      const result = await this.boardService.getProjectBoard(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+  @ApiOperation({ summary: 'Get a project board list by id' })
+  @Get('/getrecentlyViewed/:idUser')
+  async getRecentlyViewed(@Param('idUser') id: string) {
+    try {
+      const result = await this.boardService.getrecentlyViewed(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+  @ApiOperation({ summary: 'Get a project board list by id' })
+  @Get('/getguestWorkSpaces/:idUser')
+  async getguestWorkSpaces(@Param('idUser') id: string) {
+    try {
+      const result = await this.boardService.getguestWorkSpaces(id);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
+
   @Get('/findone/:id')
   async findOne(@Param('id') id: string): Promise<Board> {
     return this.boardService.findOne(id);
@@ -136,21 +173,21 @@ export class BoardController {
       return responseError(error.message || error);
     }
   }
-  // @ApiOperation({ summary: 'addRecentlyViewed ' })
-  // @Patch('/addRecentlyViewed/:idUser/:idBoard')
-  // async addRecentlyViewed(
-  //   @Param('idUser') idUser: string,
-  //   @Param('idBoard') idboard: string,
-  // ) {
-  //   try {
-  //     const result = await this.boardService.addRecentlyViewed(idUser, idboard);
-  //     return responseSuccess(result);
-  //   } catch (error) {
-  //     console.log(error.message);
-  //     this.logger.error(error.stack);
-  //     return responseError(error.message || error);
-  //   }
-  // }
+  @ApiOperation({ summary: 'addRecentlyViewed ' })
+  @Patch('/addRecentlyViewed/:idUser/:idBoard')
+  async addRecentlyViewed(
+    @Param('idUser') idUser: string,
+    @Param('idBoard') idboard: string,
+  ) {
+    try {
+      const result = await this.boardService.addRecentlyViewed(idUser, idboard);
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
   @ApiOperation({ summary: 'move card ' })
   @Patch('/movecard/:idCard/:pos')
   async moveCard(@Param('idCard') idCard: string, @Param('pos') pos: number) {

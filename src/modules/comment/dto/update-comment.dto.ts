@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class FillterCardDto {
-  @ApiProperty({ required: false })
+export class UpdateCommentDto {
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  idBoard: string;
+  content: string;
 }

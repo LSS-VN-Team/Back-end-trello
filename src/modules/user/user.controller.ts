@@ -79,26 +79,28 @@ export class UserController {
       return responseError(error.message || error);
     }
   }
-  @ApiOperation({ summary: 'get guest workspaces' })
-  @Get('/getWorkSpaces/:id')
-  async getWorkspaces(@Param('id') id: string) {
-    try {
-      const result = await this.userService.getGuestWorkSpaces(id);
-      return responseSuccess(result);
-    } catch (error) {
-      this.logger.error(error.stack);
-      return responseError(error.message || error);
-    }
-  }
-  @ApiOperation({ summary: 'get recently viewed' })
-  @Get('/recentlyViewed/:id')
-  async recentlyViewed(@Param('id') id: string) {
-    try {
-      const result = await this.userService.getRecentlyViewed(id);
-      return responseSuccess(result);
-    } catch (error) {
-      this.logger.error(error.stack);
-      return responseError(error.message || error);
-    }
-  }
+
+  // @ApiOperation({ summary: 'get guest workspaces' })
+  // @Get('/getWorkSpaces/:id')
+  // async getWorkspaces(@Param('id') id: string) {
+  //   try {
+  //     const result = await this.userService.getGuestWorkSpaces(id);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
+
+  // @ApiOperation({ summary: 'get recently viewed' })
+  // @Get('/recentlyViewed/:id')
+  // async recentlyViewed(@Param('id') id: string) {
+  //   try {
+  //     const result = await this.userService.getRecentlyViewed(id);
+  //     return responseSuccess(result);
+  //   } catch (error) {
+  //     this.logger.error(error.stack);
+  //     return responseError(error.message || error);
+  //   }
+  // }
 }

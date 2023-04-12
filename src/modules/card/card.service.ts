@@ -13,6 +13,7 @@ import { Card, CardDocument } from './card.schema';
 import { CardDto } from './dtos/create-card.dto';
 import { FillterCardDto } from './dtos/fillter-card.dto';
 import { Task, TaskDocument } from '../task/task.schema';
+import { TaskService } from '../task/task.service';
 
 @Injectable()
 export class CardService {
@@ -20,14 +21,15 @@ export class CardService {
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
+    private readonly taskService: TaskService,
   ) {}
 
   async getAll(filter: FillterCardDto, pagination: PaginationOptions) {
     const { limit, page, skip } = pagination;
     const query: any = {};
 
-    if (filter.name) {
-      query.name = { $regex: filter.name, $options: 'i' };
+    if (filter.idBoard) {
+      query.idBoard = filter.idBoard;
     }
 
     const countDocument = this.cardModel.countDocuments(query);
@@ -60,9 +62,9 @@ export class CardService {
       return card;
     }
   }
-  async findAll(): Promise<Card[]> {
-    return this.cardModel.find().exec();
-  }
+  // async findAll(T): Promise<Task[]> {
+  //   return await this.taskModel.find().populate('title', 'idCard').exec();
+  // }
 
   async findOne(id: string) {
     const card = await this.cardModel.findById({ _id: id }).lean();
@@ -90,23 +92,62 @@ export class CardService {
     );
   }
 
-  async remove(id: string) {
-    const card = await this.cardModel.findOne({ _id: id }).lean();
-    if (!card) throw new Error(`card with id is ${id} does not exist`);
-    return this.cardModel.findByIdAndDelete(id);
+  async removeAll(idCard: string) {
+    const card = await this.cardModel.findById(idCard).lean();
+    for (let i = 0; i < card.taskList.length; i++)
+      this.taskService.remove(card.taskList.at(0).id);
+    return this.cardModel.findByIdAndDelete(idCard);
   }
 
+  async removeUpToDown(idCard: string) {
+    const card = await this.cardModel.findById(idCard).lean();
+    while (card.taskList.length) {
+      this.taskService.removeUpToDown(card.taskList.at(0).id);
+      card.taskList.splice(0, 1);
+    }
+
+    return this.cardModel.findByIdAndDelete(idCard);
+  }
+
+  async remove(idCard: string) {
+    const card = await this.cardModel.findById(idCard).lean();
+    if (!card) throw new Error(`Card with id is ${idCard} does not exist`);
+    else {
+      while (card.taskList.length != 0) {
+        this.taskService.removeUpToDown(card.taskList.at(0).id);
+        card.taskList.splice(0, 1);
+      }
+      const board = await this.boardModel.findById(card.idBoard).lean();
+      if (!board)
+        throw new Error(`Project Board with id is ${idCard} does not exist`);
+      else {
+        for (let i = 0; i < board.cardList.length; i++)
+          if (board.cardList.at(i) == idCard) {
+            board.cardList.splice(i, 1);
+            break;
+          }
+        await this.boardModel.findByIdAndUpdate(
+          card.idBoard,
+          { cardList: board.cardList },
+          { new: true },
+        );
+      }
+      return this.cardModel.findByIdAndDelete(idCard);
+    }
+  }
   async moveInCard(idTask: string, pos: number) {
     const task = await this.taskModel.findById(idTask).lean();
     const card = await this.cardModel.findById(task.idCard).lean();
     for (let i = 0; i < card.taskList.length; i++) {
-      if (card.taskList.at(i) == idTask) {
+      if (card.taskList.at(i).id == idTask) {
         const index = i;
         if (pos < index) {
-          card.taskList.splice(pos, 0, idTask);
+          const task = await this.taskModel.findById(idTask).lean();
+          card.taskList.splice(pos, 0, task);
           card.taskList.splice(index + 1, 1);
         } else {
-          card.taskList.splice(pos + 1, 0, idTask);
+          const task = await this.taskModel.findById(idTask).lean();
+          card.taskList.splice(pos + 1, 0, task);
           card.taskList.splice(index, 1);
         }
         break;
@@ -127,9 +168,11 @@ export class CardService {
     const task = await this.taskModel.findById(idTask).lean();
     const oldCard = await this.cardModel.findById(task.idCard).lean();
     for (let i = 0; i < oldCard.taskList.length; i++) {
-      if (oldCard.taskList.at(i) == idTask) {
+      if (oldCard.taskList.at(i).id == idTask) {
         const newCard = await this.cardModel.findById(idPosCard).lean();
-        newCard.taskList.splice(pos, 0, idTask);
+        const task = await this.taskModel.findById(idTask).lean();
+
+        newCard.taskList.splice(pos, 0, task);
         task.idCard = newCard._id.toString();
         oldCard.taskList.splice(i, 1);
         await this.cardModel.findByIdAndUpdate(

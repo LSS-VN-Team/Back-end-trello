@@ -13,6 +13,8 @@ import { CreateTaskDto } from './dtos/create-task.dto';
 import { TaskFilterDto } from './dtos/fillter-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { Task, TaskDocument } from './task.schema';
+import { CommentService } from '../comment/comment.service';
+import { CM, CommentDocument } from '../comment/comment.schema';
 
 @Injectable()
 export class TaskService {
@@ -20,6 +22,8 @@ export class TaskService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    // @InjectModel(CM.name) private commentModel: Model<CommentDocument>,
+    private readonly commentService: CommentService,
   ) {}
 
   async getAll(filter: TaskFilterDto, pagination: PaginationOptions) {
@@ -54,21 +58,16 @@ export class TaskService {
       throw new Error(`Card ID with id is ${data.idCard} does not exist`);
     else {
       const newTask = new this.taskModel(data);
+      newTask.id = newTask._id.toString();
       const task = await newTask.save();
-      card.taskList.push(newTask._id.toString());
-      const updateData: string[] = card.taskList;
+      card.taskList.push(newTask);
       await this.cardModel.findByIdAndUpdate(
         data.idCard,
-        { taskList: updateData },
+        { taskList: card.taskList },
         { new: true },
       );
       return task;
     }
-  }
-  async remove(id: string) {
-    const task = await this.taskModel.findOne({ _id: id }).lean();
-    if (!task) throw new Error(`task with id is ${id} does not exist`);
-    return this.cardModel.findByIdAndDelete(id);
   }
 
   async update(id: string, data: UpdateTaskDto) {
@@ -177,5 +176,38 @@ export class TaskService {
       newObject.push(value);
     }
     return newObject;
+  }
+  async removeUpToDown(idTask: string) {
+    const task = await this.taskModel.findById(idTask).lean();
+
+    while (task.commentList.length) {
+      this.commentService.removeUptoDown(task.commentList.at(0));
+      task.commentList.splice(0, 1);
+    }
+
+    return this.taskModel.findByIdAndDelete(idTask);
+  }
+  async remove(idTask: string) {
+    const task = await this.taskModel.findById(idTask).lean();
+    if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
+    else {
+      while (task.commentList.length) {
+        this.commentService.removeUptoDown(task.commentList.at(0));
+        task.commentList.splice(0, 1);
+      }
+
+      const card = await this.cardModel.findById(task.idCard).lean();
+      for (let i = 0; i < card.taskList.length; i++)
+        if (card.taskList.at(i).id == idTask) {
+          card.taskList.splice(i, 1);
+          await this.cardModel.findByIdAndUpdate(
+            card._id,
+            { taskList: card.taskList },
+            { new: true },
+          );
+          break;
+        }
+      return this.taskModel.findByIdAndDelete(idTask);
+    }
   }
 }

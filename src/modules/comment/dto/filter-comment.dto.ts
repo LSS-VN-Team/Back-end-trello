@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class ImageDto {
-  @ApiProperty()
+export class CommentFilterDto {
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  url: string;
+  idTask: string;
 }
