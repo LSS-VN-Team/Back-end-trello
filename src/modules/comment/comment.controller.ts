@@ -70,4 +70,15 @@ export class CommentController {
       return responseError(error.message || error);
     }
   }
+  @ApiOperation({ summary: 'Get time FromNow Comment' })
+  @Get('/getTimeFromNow/:id')
+  async getTimeFromNow(@Param('id') id: string) {
+    try {
+      const result = await this.commentService.getTimeFromNow(id);
+      return responseSuccess(result);
+    } catch (error) {
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
+  }
 }

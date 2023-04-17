@@ -73,7 +73,18 @@ export class TaskService {
   async update(id: string, data: UpdateTaskDto) {
     const task = await this.taskModel.findById(id).lean();
     if (!task) throw new Error(`Task with id is ${id} does not exist`);
-
+    const card = await this.cardModel.findById(task.idCard).lean();
+    for (let i = 0; i < card.taskList.length; i++) {
+      if (card.taskList.at(i).id == id) {
+        card.taskList.at(i).title = data.title;
+        await this.cardModel.findByIdAndUpdate(
+          task.idCard,
+          { taskList: card.taskList },
+          { new: true },
+        );
+        break;
+      }
+    }
     const taskInstance = plainToInstance(Task, data);
 
     removeKeyUndefined(taskInstance);
@@ -91,7 +102,19 @@ export class TaskService {
       const task = await this.taskModel.findById(idTask).lean();
       if (!task) throw new Error(`Task with id is ${idTask} does not exist`);
       else {
+        const card = await this.cardModel.findById(task.idCard).lean();
         task.follower.push(idUser);
+        for (let i = 0; i < card.taskList.length; i++) {
+          if (card.taskList.at(i).id == idTask) {
+            card.taskList.at(i).follower.push(idUser);
+            await this.cardModel.findByIdAndUpdate(
+              task.idCard,
+              { taskList: card.taskList },
+              { new: true },
+            );
+            break;
+          }
+        }
         const newData: string[] = task.follower;
         const newTask = await this.taskModel.findByIdAndUpdate(
           task._id,
@@ -115,6 +138,22 @@ export class TaskService {
             task.follower.splice(i, 1);
             break;
           }
+        const card = await this.cardModel.findById(task.idCard).lean();
+        for (let i = 0; i < card.taskList.length; i++) {
+          if (card.taskList.at(i).id == idTask) {
+            for (let j = 0; j < task.follower.length; j++)
+              if (card.taskList.at(i).follower.at(j) == idUser) {
+                card.taskList.at(i).follower.splice(j, 1);
+                break;
+              }
+            await this.cardModel.findByIdAndUpdate(
+              task.idCard,
+              { taskList: card.taskList },
+              { new: true },
+            );
+            break;
+          }
+        }
         await this.taskModel.findByIdAndUpdate(
           task._id,
           { follower: task.follower },
@@ -134,6 +173,18 @@ export class TaskService {
       else {
         this.addFollower(idTask, idUser);
         task.joinner.push(idUser);
+        const card = await this.cardModel.findById(task.idCard).lean();
+        for (let i = 0; i < card.taskList.length; i++) {
+          if (card.taskList.at(i).id == idTask) {
+            card.taskList.at(i).joinner.push(idUser);
+            await this.cardModel.findByIdAndUpdate(
+              task.idCard,
+              { taskList: card.taskList },
+              { new: true },
+            );
+            break;
+          }
+        }
         await this.taskModel.findByIdAndUpdate(
           task._id,
           { joinner: task.joinner },
@@ -157,6 +208,22 @@ export class TaskService {
             task.joinner.splice(i, 1);
             break;
           }
+        const card = await this.cardModel.findById(task.idCard).lean();
+        for (let i = 0; i < card.taskList.length; i++) {
+          if (card.taskList.at(i).id == idTask) {
+            for (let j = 0; j < task.joinner.length; j++)
+              if (card.taskList.at(i).joinner.at(j) == idUser) {
+                card.taskList.at(i).joinner.splice(j, 1);
+                break;
+              }
+            await this.cardModel.findByIdAndUpdate(
+              task.idCard,
+              { taskList: card.taskList },
+              { new: true },
+            );
+            break;
+          }
+        }
         await this.taskModel.findByIdAndUpdate(
           task._id,
           { joinner: task.joinner },

@@ -18,14 +18,15 @@ import {
 } from '@nestjs/swagger';
 import { url } from 'inspector';
 import { async } from 'rxjs';
-import { ImageDocument, Upload } from './upload.schema';
+// import { UploadDocument, Upload } from './upload.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 @ApiTags('upload')
 @Controller('upload')
 export class UpLoadController {
-  @InjectModel(Upload.name) private readonly imageModel: Model<ImageDocument>;
+  // @InjectModel(Upload.name) private readonly imageModel: Model<UploadDocument>;
+
   private readonly logger = new Logger(UpLoadController.name);
 
   @Post()
@@ -66,13 +67,5 @@ export class UpLoadController {
       this.logger.error(error.stack);
       return responseError(error.message || error);
     }
-  }
-
-  @Get('url')
-  async findAll(): Promise<Upload[]> {
-    const images = await this.imageModel.find().exec();
-    return images.map((image) => ({
-      url: image.url,
-    }));
   }
 }

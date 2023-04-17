@@ -13,6 +13,7 @@ import { CM, CommentDocument } from './comment.schema';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CommentFilterDto } from './dto/filter-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+const moment = require('moment');
 
 @Injectable()
 export class CommentService {
@@ -97,5 +98,15 @@ export class CommentService {
         }
       return this.commentModel.findByIdAndDelete(idCmt);
     }
+  }
+  async getTimeFromNow(idCmt: string) {
+    x = 1;
+    console.log(x);
+    let x;
+
+    const cmt = await this.commentModel.findById(idCmt).lean();
+    if (!cmt) throw new Error(`Comment with id is ${idCmt} does not exist`);
+    const createTime = moment(cmt.createdAt);
+    return createTime.fromNow();
   }
 }
